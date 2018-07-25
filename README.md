@@ -8,6 +8,8 @@ Tool written in golang to automatically book choosen courses on https://fair-fit
 
 ## TODO
 
+- !!! Timeout in HTTP Client !!!
+
 - Properly check if courses are in the future
 
 - Make it possible to set a time from which on courses will be booked e.g. 1600 (can do this in parsing of future() )
@@ -25,4 +27,3 @@ Tool written in golang to automatically book choosen courses on https://fair-fit
 - Better logging
 
 - Usage Messages
-
