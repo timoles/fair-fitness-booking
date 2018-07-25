@@ -13,6 +13,8 @@ go build fairfitness.go
 
 ## TODO
 
+-  Currently trying to book courses that are already booked, need to change that
+
 - !!! Timeout in HTTP Client !!!
 
 - Properly check if courses are in the future
