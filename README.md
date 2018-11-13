@@ -9,7 +9,7 @@ go build fairfitness.go
 
 ## Example Usage
 
-./book 'TRX.14' 'Yoga,18'
+./book 'TRX,14' 'Yoga,18'
 
 ## TODO
 - See issues
