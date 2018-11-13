@@ -108,6 +108,7 @@ func readKW(body string) bool {
 	return false
 }
 
+
 func writeKW(kw string) {
 	f, err := os.Create("kw.txt")
 	checkErrorPanic(err)
@@ -115,6 +116,7 @@ func writeKW(kw string) {
 	_, err = f.WriteString(kw) // doesn't matter if KW is only one digit because there's a trailing space
 	checkErrorPanic(err)
 }
+
 
 func checkPage(body string) {
 	// fmt.Println(body)
