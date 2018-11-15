@@ -9,7 +9,14 @@ go build fairfitness.go
 
 ## Example Usage
 
+Set your password in the password.txt
+
+Change the username withing fairfitness.go in the line (fm.Input("username", "[Your Username]"))
+
 ./book 'TRX' 'Yoga'
 
-## TODO
-- See issues
+## Troubleshoot
+
+* No booking confirmation
+
+        Check your login credentials

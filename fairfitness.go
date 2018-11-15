@@ -40,8 +40,8 @@ func main() {
 	// Read from args what courses the user wants to book
 	wantedCourses = make(map[string]string)
 	for i := 0; i < len(flag.Args()); i++ {
-		splitted := strings.Split(flag.Args()[i],",")
-		if len(splitted) != 2 ||  splitted[0] == "" || splitted[1] == ""{
+		splitted := strings.Split(flag.Args()[i], ",")
+		if len(splitted) != 2 || splitted[0] == "" || splitted[1] == "" {
 			log.Fatal("Wrong Parameters (Example: fairfitnes.go 'Yoga,10' 'TRX,19')")
 		}
 		wantedCourses[splitted[0]] = splitted[1]
@@ -50,6 +50,10 @@ func main() {
 	err = bow.Open("https://fair-fitness.com/fitness-clubs/neu-ulm")
 	if err != nil {
 		panic(err)
+	}
+	test := bow.Body()
+	if !readKW(test) {
+		os.Exit(1)
 	}
 
 	// Read password file and submit form with login credentials
@@ -101,13 +105,12 @@ func readKW(body string) bool {
 		writeKW(kwOld)
 		return true
 	}
-	if debug == true{
+	if debug == true {
 		return true
 	}
 	fmt.Println("No new course plan detected, exiting...")
 	return false
 }
-
 
 func writeKW(kw string) {
 	f, err := os.Create("kw.txt")
@@ -117,56 +120,55 @@ func writeKW(kw string) {
 	checkErrorPanic(err)
 }
 
-
 func checkPage(body string) {
 	// fmt.Println(body)
 	coursesAvailable := strings.Contains(body, "cpf_tr3")
 	// Check if a new week is available, TODO doesn't recheck if booking is possible in the middle of the week
-	if readKW(body) {
-		for coursesAvailable {
-			// Get Course
-			indexCourseBegin := strings.Index(body, "cpf_tr3")
-			indexCourseEnd := strings.Index(body[indexCourseBegin:], "</tr>")
-			courseString := body[indexCourseBegin : indexCourseBegin+indexCourseEnd]
-			// fmt.Println(courseString)
-			timeIndexStart := strings.Index(courseString,"<td class=\"cpf_td4a\">")
-			timeIndexEnd := strings.Index(courseString[timeIndexStart+21:],":")
-			timeStart := courseString[timeIndexStart+21:timeIndexStart+21+timeIndexEnd]
-			timeStart = strings.TrimSpace(timeStart)
-			timeStartInt, err := strconv.Atoi(timeStart)
-			checkErrorPanic(err)
-			// Get course Type
-			indexTypeBegin := strings.Index(courseString, "cpf_sp1a") + 10
-			indexTypeEnd := strings.Index(courseString[indexTypeBegin:], "</span")
-			courseType := courseString[indexTypeBegin : indexTypeBegin+indexTypeEnd]
-			fmt.Println("Coursetype found: " + courseType)
 
-			// Check if check-in possible and extract submit value
-			if strings.Contains(courseString, "Reservieren!") {
-				valueIndexBegin := strings.Index(courseString, "value=") + 7
-				valueIndexEnd := strings.Index(courseString[valueIndexBegin:], "\"")
-				submitValue := courseString[valueIndexBegin : valueIndexBegin+valueIndexEnd]
-				submitValue = strings.TrimSpace(submitValue)
-				fmt.Println("	[+] Course can be booked with value: " + submitValue)
-				timeArgs, bookingRequested := wantedCourses[courseType]
+	for coursesAvailable {
+		// Get Course
+		indexCourseBegin := strings.Index(body, "cpf_tr3")
+		indexCourseEnd := strings.Index(body[indexCourseBegin:], "</tr>")
+		courseString := body[indexCourseBegin : indexCourseBegin+indexCourseEnd]
+		// fmt.Println(courseString)
+		timeIndexStart := strings.Index(courseString, "<td class=\"cpf_td4a\">")
+		timeIndexEnd := strings.Index(courseString[timeIndexStart+21:], ":")
+		timeStart := courseString[timeIndexStart+21 : timeIndexStart+21+timeIndexEnd]
+		timeStart = strings.TrimSpace(timeStart)
+		timeStartInt, err := strconv.Atoi(timeStart)
+		checkErrorPanic(err)
+		// Get course Type
+		indexTypeBegin := strings.Index(courseString, "cpf_sp1a") + 10
+		indexTypeEnd := strings.Index(courseString[indexTypeBegin:], "</span")
+		courseType := courseString[indexTypeBegin : indexTypeBegin+indexTypeEnd]
+		fmt.Println("Coursetype found: " + courseType)
 
-				if bookingRequested {
-					// Only if booking is requested we have a valid timeArgs
-					timeArgsInt,err := strconv.Atoi(timeArgs)
-					checkErrorPanic(err)
-					if timeStartInt >= timeArgsInt{
-						fmt.Println("	[*] Trying to book course")
-						bookCourse(submitValue)
-					}
+		// Check if check-in possible and extract submit value
+		if strings.Contains(courseString, "Reservieren!") {
+			valueIndexBegin := strings.Index(courseString, "value=") + 7
+			valueIndexEnd := strings.Index(courseString[valueIndexBegin:], "\"")
+			submitValue := courseString[valueIndexBegin : valueIndexBegin+valueIndexEnd]
+			submitValue = strings.TrimSpace(submitValue)
+			fmt.Println("	[+] Course can be booked with value: " + submitValue)
+			timeArgs, bookingRequested := wantedCourses[courseType]
+
+			if bookingRequested {
+				// Only if booking is requested we have a valid timeArgs
+				timeArgsInt, err := strconv.Atoi(timeArgs)
+				checkErrorPanic(err)
+				if timeStartInt >= timeArgsInt {
+					fmt.Println("	[*] Trying to book course")
+					bookCourse(submitValue)
 				}
-			} else {
-				fmt.Println("	[-] Course full")
 			}
-			body = body[indexCourseBegin+indexCourseEnd:]
-			coursesAvailable = strings.Contains(body, "cpf_tr3")
-
+		} else {
+			fmt.Println("	[-] Course full")
 		}
+		body = body[indexCourseBegin+indexCourseEnd:]
+		coursesAvailable = strings.Contains(body, "cpf_tr3")
+
 	}
+
 }
 
 func bookCourse(value string) {
