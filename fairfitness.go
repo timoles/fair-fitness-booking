@@ -112,6 +112,7 @@ func readKW(body string) bool {
 	return false
 }
 
+
 func writeKW(kw string) {
 	f, err := os.Create("kw.txt")
 	checkErrorPanic(err)
@@ -120,10 +121,12 @@ func writeKW(kw string) {
 	checkErrorPanic(err)
 }
 
+
 func checkPage(body string) {
 	// fmt.Println(body)
 	coursesAvailable := strings.Contains(body, "cpf_tr3")
 	// Check if a new week is available, TODO doesn't recheck if booking is possible in the middle of the week
+
 
 	for coursesAvailable {
 		// Get Course
@@ -166,7 +169,6 @@ func checkPage(body string) {
 		}
 		body = body[indexCourseBegin+indexCourseEnd:]
 		coursesAvailable = strings.Contains(body, "cpf_tr3")
-
 	}
 
 }
